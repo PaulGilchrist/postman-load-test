@@ -8,7 +8,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PaulGilchrist/PostmanLoadTest.git"
+    "url": "https://github.com/PaulGilchrist/postman-load-test.git"
   },
   "private": true,
   "version": "1.0.0",

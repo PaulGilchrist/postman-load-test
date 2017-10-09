@@ -4,7 +4,7 @@ Enhancement for PostMan allowing for parallel execution of API calls to simulate
 
 ## Steps
 1. Download this project or clone it using GIT
-	* git clone https://github.com/PaulGilchrist/postmanLoadTest.git
+	* git clone https://github.com/PaulGilchrist/postman-load-test.git
 1. Install nodejs (if not already installed)
 2. Change to the postmanLoadTest folder and install needed packages
 	* npm install
@@ -13,12 +13,15 @@ Enhancement for PostMan allowing for parallel execution of API calls to simulate
 5. Launch the load test
 	* node app.js
 6. Record results
-	* requests/second
-	* average duration
-7. Continue to scale up users recording results until errors occur
+	* Concurrent Threads
+	* Total Run Duration (sec)
+	* Average Response Time (sec)
+	* Requests Executed and Failed
+	* Assertions Executed and Failed
+7. Continue to scale up users recording results until errors occur or average response time becomes unacceptable
 8. Look at Azure metrics to determine if bottleneck is website or database
-9. Scale up Azure, record old and new sizes, then repeat last k6 test and record results
-10. Continue to scale up users recording results until errors occur, then scale up Azure, etc.
-	* All testing is complete when users have reached 5000 concurrent.
+9. Scale up Azure, recording old and new sizes, then repeat last test and record results
+10. Continue to scale up parallel threads recording results until errors occur, then scale up Azure, etc.
+	* All testing is complete when threads have exceeded the number of expected concurrent users
 	* All test results should be associated with the Azure size at time of test
 11. Return Azure to its original size
