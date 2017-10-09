@@ -1,0 +1,144 @@
+{
+	"variables": [],
+	"info": {
+		"name": "EDH POC",
+		"_postman_id": "12dcb48f-7cba-f5d4-2520-189292d2ff72",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET Markets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"tests[\"Content-Type is JSON\"] = postman.getResponseHeader(\"Content-Type\").has(\"application/json\");",
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Count = 30\"] = jsonData[\"@odata.count\"] === 30;",
+							"postman.setNextRequest(\"GET Arizona Market\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{baseUrl}}/odata/markets?$count=true",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"odata",
+						"markets"
+					],
+					"query": [
+						{
+							"key": "$count",
+							"value": "true",
+							"equals": true
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET Arizona Market",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"tests[\"Content-Type is JSON\"] = postman.getResponseHeader(\"Content-Type\").has(\"application/json\");",
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Arizona market Found\"] = jsonData.name === 'Arizona Market';",
+							"postman.setNextRequest(\"GET Communities for Arizona\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {},
+				"url": "{{baseUrl}}/odata/markets(4)",
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET Communities for Arizona",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"tests[\"Content-Type is JSON\"] = postman.getResponseHeader(\"Content-Type\").has(\"application/json\");",
+							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Count = 441\"] = jsonData['@odata.count'] === 441;",
+							"postman.setNextRequest(null);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{baseUrl}}/odata/communities?$filter=marketId%20eq%204&$count=true",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"odata",
+						"communities"
+					],
+					"query": [
+						{
+							"key": "$filter",
+							"value": "marketId%20eq%204",
+							"equals": true
+						},
+						{
+							"key": "$count",
+							"value": "true",
+							"equals": true
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

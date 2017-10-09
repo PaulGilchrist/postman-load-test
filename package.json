@@ -1,0 +1,22 @@
+{
+  "authors": [
+    "Paul Gilchrist"
+  ],
+  "name": "postman-load-test",
+  "description": "Allow parallel execution of Poastman tests",
+  "homepage": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PaulGilchrist/PostmanLoadTest.git"
+  },
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "newman": "^3.8.3"
+  },
+  "devDependencies": {}
+}
