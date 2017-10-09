@@ -1,10 +1,9 @@
 {
-	"variables": [],
 	"info": {
 		"name": "EDH POC",
 		"_postman_id": "12dcb48f-7cba-f5d4-2520-189292d2ff72",
 		"description": "",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -17,7 +16,7 @@
 						"exec": [
 							"tests[\"Status code is 200\"] = responseCode.code === 200;",
 							"tests[\"Content-Type is JSON\"] = postman.getResponseHeader(\"Content-Type\").has(\"application/json\");",
-							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"//tests[\"Response time is less than 500ms\"] = responseTime < 500;",
 							"var jsonData = JSON.parse(responseBody);",
 							"tests[\"Count = 30\"] = jsonData[\"@odata.count\"] === 30;",
 							"postman.setNextRequest(\"GET Arizona Market\");"
@@ -65,7 +64,7 @@
 						"exec": [
 							"tests[\"Status code is 200\"] = responseCode.code === 200;",
 							"tests[\"Content-Type is JSON\"] = postman.getResponseHeader(\"Content-Type\").has(\"application/json\");",
-							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"//tests[\"Response time is less than 500ms\"] = responseTime < 500;",
 							"var jsonData = JSON.parse(responseBody);",
 							"tests[\"Arizona market Found\"] = jsonData.name === 'Arizona Market';",
 							"postman.setNextRequest(\"GET Communities for Arizona\");"
@@ -82,7 +81,16 @@
 					}
 				],
 				"body": {},
-				"url": "{{baseUrl}}/odata/markets(4)",
+				"url": {
+					"raw": "{{baseUrl}}/odata/markets(4)",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"odata",
+						"markets(4)"
+					]
+				},
 				"description": ""
 			},
 			"response": []
@@ -97,7 +105,7 @@
 						"exec": [
 							"tests[\"Status code is 200\"] = responseCode.code === 200;",
 							"tests[\"Content-Type is JSON\"] = postman.getResponseHeader(\"Content-Type\").has(\"application/json\");",
-							"tests[\"Response time is less than 500ms\"] = responseTime < 500;",
+							"//tests[\"Response time is less than 500ms\"] = responseTime < 500;",
 							"var jsonData = JSON.parse(responseBody);",
 							"tests[\"Count = 441\"] = jsonData['@odata.count'] === 441;",
 							"postman.setNextRequest(null);"

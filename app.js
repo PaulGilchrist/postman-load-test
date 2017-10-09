@@ -1,6 +1,6 @@
 
 //Customizable variables
-const threadCount = 10;
+const threadCount = 200;
 const options = {
 	collection: './postman_collection.json',
 	delayRequest: 3000,
@@ -37,7 +37,10 @@ function processResults(summaries) {
 		averageResponseTime += run.timings.responseAverage;
 		// Get total data recieved (run.executions[].response.responseSize)
 		for (let j = 0; j < run.executions.length; j++) {
-			responseSize += run.executions[j].response.responseSize;
+			let response = run.executions[j].response;
+			if(response) {
+				responseSize += run.executions[j].response.responseSize;
+			}
 		}
 		requestsExecuted += run.stats.requests.total;
 		requestsFailed += run.stats.requests.failed;
@@ -50,8 +53,8 @@ function processResults(summaries) {
 	console.log(`Concurrent Threads:          ${threadCount}`);
 	console.log(`Total Run Duration (sec):    ${totalRunDuration.toFixed(1)},`);
 	console.log(`Average Response Time (sec): ${averageResponseTime.toFixed(2)},`);
-	console.log(`Requests:                    Executed = ${requestsExecuted}, Failed = ${requestsFailed}`);
-	console.log(`Assertions:                  Executed = ${assertionsExecuted}, Failed = ${assertionsFailed}`);
+	console.log(`Requests:                    Executed = ${requestsExecuted}, Failed = ${requestsFailed}, Success Rate = ${((1-(requestsFailed/requestsExecuted))*100).toFixed(0)}%`);
+	console.log(`Assertions:                  Executed = ${assertionsExecuted}, Failed = ${assertionsFailed}, Success Rate = ${((1-(assertionsFailed/assertionsExecuted))*100).toFixed(0)}%`);
 }
 
 function testThread(summaries, callback) {
