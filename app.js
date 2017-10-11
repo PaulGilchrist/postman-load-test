@@ -57,6 +57,7 @@ function processResults(summaries) {
 	console.log(`\nAll test now complete\n`);
 	console.log(`Concurrent Threads:          ${threadCount}`);
 	console.log(`Total Run Duration (sec):    ${totalRunDuration.toFixed(1)},`);
+	console.log(`Requests per Second:         ${(requestsExecuted/totalRunDuration).toFixed(1)}`);
 	console.log(`Average Response Time (sec): ${averageResponseTime.toFixed(2)},`);
 	console.log(`Requests:                    Executed = ${requestsExecuted}, Failed = ${requestsFailed}, Success Rate = ${((1-(requestsFailed/requestsExecuted))*100).toFixed(0)}%`);
 	console.log(`Assertions:                  Executed = ${assertionsExecuted}, Failed = ${assertionsFailed}, Success Rate = ${((1-(assertionsFailed/assertionsExecuted))*100).toFixed(0)}%`);
