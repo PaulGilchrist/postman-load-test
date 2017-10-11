@@ -1,65 +1,67 @@
+//	Run the script using the following command to allocate 8GB of memory to the heap and allow for more parallelism
+//		node --max-old-space-size=8192 app.js
 
 //Customizable variables
-const threadCount = 100; // Number of concurrent threads
-const threadRampUpPerSecond = 1; //1 thread will be added every second until threadCount is reached
+const usersToSimulate = 0
+const averageCallsPerUserPerMinute = 2;
+
 const options = {
 	collection: './postman_collection.json',
-	delayRequest: 30000, // Each thread will make an API call every 30 seconds
     environment: './postman_environment.json',
-    iterationCount: 1,
     reporters: ['cli']
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Do not change any variables below this line
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //Required components
 const after = require('lodash').after;
-const fs = require('fs');
 const newman = require('newman');
+const v8 = require('v8');
 
 //private variables
 let testStartTime;
+let threadCount;
+let averageResponseTimeMs = 0, responseSize = 0, requestsExecuted = 0, requestsFailed = 0, assertionsExecuted = 0, assertionsFailed = 0;
 
-function processResults(summaries) {
-	let averageResponseTime = 0, responseSize = 0, requestsExecuted = 0, requestsFailed = 0, assertionsExecuted = 0, assertionsFailed = 0;
-	for (let i = 0; i < threadCount; i++) {
-		let run = summaries[i].run;
-		averageResponseTime += run.timings.responseAverage;
-		// Get total data recieved (run.executions[].response.responseSize)
-		for (let j = 0; j < run.executions.length; j++) {
-			let response = run.executions[j].response;
-			if(response) {
-				responseSize += run.executions[j].response.responseSize;
-			}
-		}
-		requestsExecuted += run.stats.requests.total;
-		requestsFailed += run.stats.requests.failed;
-		assertionsExecuted += run.stats.assertions.total;
-		assertionsFailed += run.stats.assertions.failed;
-	}
-	averageResponseTime = averageResponseTime / threadCount / 1000;
+function showResultsSummary() {
 	let totalRunDuration = (Date.now() - testStartTime) / 1000;
 	console.log(`\nAll test now complete\n`);
-	console.log(`Concurrent Threads:          ${threadCount}`);
-	console.log(`Total Run Duration (sec):    ${totalRunDuration.toFixed(1)},`);
-	console.log(`Requests per Second:         ${(requestsExecuted/totalRunDuration).toFixed(1)}`);
-	console.log(`Average Response Time (sec): ${averageResponseTime.toFixed(2)},`);
+	console.log(`Simulated Users:             ${usersToSimulate}`);
+	console.log(`Avg Calls / User / Min:      ${averageCallsPerUserPerMinute}`);
+	console.log(`Total Run Duration (sec):    ${totalRunDuration.toFixed(0)},`);
+	console.log(`Requests per Second:         ${(threadCount*1000/options.delayRequest).toFixed(1)}`);
+	console.log(`Average Response Time (sec): ${(averageResponseTimeMs/1000).toFixed(2)},`);
 	console.log(`Requests:                    Executed = ${requestsExecuted}, Failed = ${requestsFailed}, Success Rate = ${((1-(requestsFailed/requestsExecuted))*100).toFixed(0)}%`);
 	console.log(`Assertions:                  Executed = ${assertionsExecuted}, Failed = ${assertionsFailed}, Success Rate = ${((1-(assertionsFailed/assertionsExecuted))*100).toFixed(0)}%`);
 }
 
 function test() {
 	// Use lodash.after to wait till all threads complete before aggregating the results
-	let finished = after(threadCount, processResults);
-	let summaries = [];
+	threadCount = usersToSimulate;
+	options.delayRequest = 60000 / averageCallsPerUserPerMinute;
+	options.iterationCount = 1;
+	
+	// Determine if there is enough heap space for the requested number of threads
+	console.log(`Was heap raised = ${process.argv}`);
+
+	while(threadCount > 100 && options.delayRequest >= 1000) {
+		// We run out of heap space if newman is parallelized too much, so lets limit threads to 100 and run less delay between requests
+		threadCount = threadCount / 10;
+		options.delayRequest = options.delayRequest / 10
+		options.iterationCount = options.iterationCount * 10
+	}
+	let next = after(threadCount, showResultsSummary);
 	testStartTime = Date.now();
 	for (let i = 0; i < threadCount; i++) {
 		setTimeout(() => {
-			console.log(`Adding test thread # ${i}`);
-			testThread(summaries, finished)
-		}, i * (1000 / threadRampUpPerSecond));
+			testThread(next);
+		}, i * 1000); // Threads ramp up one per second
 	}
 }
 
-function testThread(summaries, callback) {
+function testThread(next) {
 	// console.log(`Test thread - starting`);
 	newman.run(
 		options,
@@ -67,9 +69,19 @@ function testThread(summaries, callback) {
 			if (err) {
 				console.log(err);
 			}
-			// console.log('Test thread - complete');
-			summaries.push(summary);
-			callback(summaries);
+			averageResponseTimeMs += summary.run.timings.responseAverage / threadCount;
+			requestsExecuted += summary.run.stats.requests.total;
+			requestsFailed += summary.run.stats.requests.failed;
+			assertionsExecuted += summary.run.stats.assertions.total;
+			assertionsFailed += summary.run.stats.assertions.failed;
+			// Get total data recieved (run.executions[].response.responseSize)
+			for (let i = 0; i < summary.run.executions.length; i++) {
+				let response = summary.run.executions[i].response;
+				if(response) {
+					responseSize += response.responseSize;
+				}
+			}
+			next();
 		}
 	);
 }
