@@ -1,6 +1,6 @@
 
 //Customizable variables
-const threadCount = 200;
+const threadCount = 50;
 const options = {
 	collection: './postman_collection.json',
 	delayRequest: 3000,
@@ -21,8 +21,6 @@ function test() {
 	// Use lodash.after to wait till all threads complete before aggregating the results
 	let finished = after(threadCount, processResults);
 	let summaries = [];
-	console.log(`Running test collection: ${options.collection}`);
-	console.log(`Running ${threadCount} threads at ${options.iterationCount} iterations each`);
 	testStartTime = Date.now();
 	for (let i = 0; i < threadCount; i++) {
 		testThread(summaries, finished);
@@ -30,7 +28,6 @@ function test() {
 }
 
 function processResults(summaries) {
-	let sections = ['iterations', 'items', 'scripts', 'prerequests', 'requests', 'tests', 'assertions', 'testScripts', 'prerequestScripts'];
 	let averageResponseTime = 0, responseSize = 0, requestsExecuted = 0, requestsFailed = 0, assertionsExecuted = 0, assertionsFailed = 0;
 	for (let i = 0; i < threadCount; i++) {
 		let run = summaries[i].run;
