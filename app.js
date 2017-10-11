@@ -6,12 +6,12 @@
 //Customizable variables
 const usersToSimulate = 4000;
 const averageCallsPerUserPerMinute = 2;
-const lowMemoryMode = false;  // Runs less total threads to reduce memory pressure, but increases requests per second to still simulate same user count
+const lowMemoryMode = true;  // Runs less total threads to reduce memory pressure, but increases requests per second to still simulate same user count
 
 const options = {
 	collection: './postman_collection.json',
     environment: './postman_environment.json',
-    reporters: ['cli']
+    reporters: ['cli', 'json']
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ function showResultsSummary() {
 	console.log(`\nAll test now complete\n`);
 	console.log(`Simulated Users:             ${usersToSimulate}`);
 	console.log(`Total Run Duration (sec):    ${totalRunDuration.toFixed(0)}`);
-	console.log(`Total Data Received:    	  ${responseSize.toFixed(0)}`);
+	console.log(`Total Data Received:         ${responseSize.toFixed(0)}`);
 	console.log(`Avg Calls / User / Min:      ${averageCallsPerUserPerMinute}`);
 	console.log(`Requests per Second:         ${(threadCount*1000/options.delayRequest).toFixed(1)}`);
 	console.log(`Average Response Time (sec): ${(averageResponseTimeMs/1000).toFixed(2)}`);
@@ -46,7 +46,7 @@ function test() {
 	threadCount = usersToSimulate;
 	options.delayRequest = 60000 / averageCallsPerUserPerMinute;
 	options.iterationCount = 1;
-	while(options.delayRequest >= 1000 && ((threadCount > 1000) || (lowMemoryMode && threadCount > 100))) {
+	while(options.delayRequest >= 1000 && ((threadCount > 500) || (lowMemoryMode && threadCount > 100))) {
 		// We run out of heap space if newman is parallelized too much, so lets limit threads to 100 and run less delay between requests
 		threadCount = threadCount / 10;
 		options.delayRequest = options.delayRequest / 10
