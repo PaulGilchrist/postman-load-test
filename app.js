@@ -1,6 +1,6 @@
 
 //Customizable variables
-const threadCount = 10; // Number of concurrent threads
+const threadCount = 100; // Number of concurrent threads
 const threadRampUpPerSecond = 1; //1 thread will be added every second until threadCount is reached
 const options = {
 	collection: './postman_collection.json',
@@ -17,23 +17,6 @@ const newman = require('newman');
 
 //private variables
 let testStartTime;
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function test() {
-	// Use lodash.after to wait till all threads complete before aggregating the results
-	let finished = after(threadCount, processResults);
-	let summaries = [];
-	testStartTime = Date.now();
-	for (let i = 0; i < threadCount; i++) {
-		setTimeout(() => {
-			console.log(`Adding test thread # ${i}`);
-			testThread(summaries, finished)
-		}, i * (1000 / threadRampUpPerSecond));
-	}
-}
 
 function processResults(summaries) {
 	let averageResponseTime = 0, responseSize = 0, requestsExecuted = 0, requestsFailed = 0, assertionsExecuted = 0, assertionsFailed = 0;
@@ -61,6 +44,19 @@ function processResults(summaries) {
 	console.log(`Average Response Time (sec): ${averageResponseTime.toFixed(2)},`);
 	console.log(`Requests:                    Executed = ${requestsExecuted}, Failed = ${requestsFailed}, Success Rate = ${((1-(requestsFailed/requestsExecuted))*100).toFixed(0)}%`);
 	console.log(`Assertions:                  Executed = ${assertionsExecuted}, Failed = ${assertionsFailed}, Success Rate = ${((1-(assertionsFailed/assertionsExecuted))*100).toFixed(0)}%`);
+}
+
+function test() {
+	// Use lodash.after to wait till all threads complete before aggregating the results
+	let finished = after(threadCount, processResults);
+	let summaries = [];
+	testStartTime = Date.now();
+	for (let i = 0; i < threadCount; i++) {
+		setTimeout(() => {
+			console.log(`Adding test thread # ${i}`);
+			testThread(summaries, finished)
+		}, i * (1000 / threadRampUpPerSecond));
+	}
 }
 
 function testThread(summaries, callback) {
