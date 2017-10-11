@@ -1,9 +1,10 @@
 
 //Customizable variables
-const threadCount = 50;
+const threadCount = 10; // Number of concurrent threads
+const threadRampUpPerSecond = 1; //1 thread will be added every second until threadCount is reached
 const options = {
 	collection: './postman_collection.json',
-	delayRequest: 3000,
+	delayRequest: 30000, // Each thread will make an API call every 30 seconds
     environment: './postman_environment.json',
     iterationCount: 1,
     reporters: ['cli']
@@ -17,13 +18,20 @@ const newman = require('newman');
 //private variables
 let testStartTime;
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function test() {
 	// Use lodash.after to wait till all threads complete before aggregating the results
 	let finished = after(threadCount, processResults);
 	let summaries = [];
 	testStartTime = Date.now();
 	for (let i = 0; i < threadCount; i++) {
-		testThread(summaries, finished);
+		setTimeout(() => {
+			console.log(`Adding test thread # ${i}`);
+			testThread(summaries, finished)
+		}, i * (1000 / threadRampUpPerSecond));
 	}
 }
 
