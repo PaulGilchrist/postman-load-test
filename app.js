@@ -65,7 +65,7 @@ function testThread(summaries, callback) {
 		options,
 		(err, summary) => {
 			if (err) {
-				throw err;
+				console.log(err);
 			}
 			// console.log('Test thread - complete');
 			summaries.push(summary);
