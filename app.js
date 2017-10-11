@@ -1,9 +1,12 @@
-//	Run the script using the following command to allocate 8GB of memory to the heap and allow for more parallelism
+// Run node passing the the "--max-old-space-size" parameter to ensure there is enough memory to support the number of threads you have choosen.
 //		node --max-old-space-size=8192 app.js
+// If the script errors with a heap allocation error, either reduce the number of threads, or increase the memory allocated by "max-old-space-size"
+// This application has been successfully tested beyond 4000 threads but required more than 12GB of memory unless set to low memory mode
 
 //Customizable variables
-const usersToSimulate = 0
+const usersToSimulate = 4000;
 const averageCallsPerUserPerMinute = 2;
+const lowMemoryMode = false;  // Runs less total threads to reduce memory pressure, but increases requests per second to still simulate same user count
 
 const options = {
 	collection: './postman_collection.json',
@@ -18,7 +21,6 @@ const options = {
 //Required components
 const after = require('lodash').after;
 const newman = require('newman');
-const v8 = require('v8');
 
 //private variables
 let testStartTime;
@@ -29,24 +31,22 @@ function showResultsSummary() {
 	let totalRunDuration = (Date.now() - testStartTime) / 1000;
 	console.log(`\nAll test now complete\n`);
 	console.log(`Simulated Users:             ${usersToSimulate}`);
+	console.log(`Total Run Duration (sec):    ${totalRunDuration.toFixed(0)}`);
+	console.log(`Total Data Received:    	  ${responseSize.toFixed(0)}`);
 	console.log(`Avg Calls / User / Min:      ${averageCallsPerUserPerMinute}`);
-	console.log(`Total Run Duration (sec):    ${totalRunDuration.toFixed(0)},`);
 	console.log(`Requests per Second:         ${(threadCount*1000/options.delayRequest).toFixed(1)}`);
-	console.log(`Average Response Time (sec): ${(averageResponseTimeMs/1000).toFixed(2)},`);
+	console.log(`Average Response Time (sec): ${(averageResponseTimeMs/1000).toFixed(2)}`);
 	console.log(`Requests:                    Executed = ${requestsExecuted}, Failed = ${requestsFailed}, Success Rate = ${((1-(requestsFailed/requestsExecuted))*100).toFixed(0)}%`);
 	console.log(`Assertions:                  Executed = ${assertionsExecuted}, Failed = ${assertionsFailed}, Success Rate = ${((1-(assertionsFailed/assertionsExecuted))*100).toFixed(0)}%`);
 }
 
 function test() {
 	// Use lodash.after to wait till all threads complete before aggregating the results
+	let threadRampUpPerSec = 4;
 	threadCount = usersToSimulate;
 	options.delayRequest = 60000 / averageCallsPerUserPerMinute;
 	options.iterationCount = 1;
-	
-	// Determine if there is enough heap space for the requested number of threads
-	console.log(`Was heap raised = ${process.argv}`);
-
-	while(threadCount > 100 && options.delayRequest >= 1000) {
+	while(options.delayRequest >= 1000 && ((threadCount > 1000) || (lowMemoryMode && threadCount > 100))) {
 		// We run out of heap space if newman is parallelized too much, so lets limit threads to 100 and run less delay between requests
 		threadCount = threadCount / 10;
 		options.delayRequest = options.delayRequest / 10
@@ -57,7 +57,7 @@ function test() {
 	for (let i = 0; i < threadCount; i++) {
 		setTimeout(() => {
 			testThread(next);
-		}, i * 1000); // Threads ramp up one per second
+		}, i * 1000 / threadRampUpPerSec); // Threads ramp up
 	}
 }
 
