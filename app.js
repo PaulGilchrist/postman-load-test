@@ -1,16 +1,14 @@
-// This application has been successfully tested to 400 threads
-//  Network can spike to 54 Mbps at 1000 users
+// This application has been successfully tested to 4000 usersToSimulate and 400 maxThreads
 
 // Standard tuning
-const usersToSimulate = 100;
+const usersToSimulate = 4000;
 const averageCallsPerUserPerMinute = 2; // Recommend 2 for load test or 60 for stress test
 
 // Advanced tuning
-// Run node passing the the "--max-old-space-size" parameter to ensure there is enough memory to support the number of threads you have choosen.
-//		node --max-old-space-size=8192 app.js
-// If the script errors with a heap allocation error, either reduce the number of threads, or increase the memory allocated by "max-old-space-size"
+// Run node passing the the "--max-old-space-size" parameter to ensure there is enough memory to support the number of maxThreads you have choosen.
+//		example: node --max-old-space-size=20480 app.js
 const threadRampUpPerSec = 4; // Stay between 1 and 4 to keep the API calls evenly distributed
-const maxThreads = 50; // Testing shows 34 MB of memory required per thread.  (example: --max-old-space-size=18432) Successfully tested to 400 threads. Fails at 500 threads 
+const maxThreads = 200; // Testing shows 34 MB of memory required per thread
 
 const options = {
 	collection: './postman_collection.json',
@@ -31,23 +29,41 @@ const after = require('lodash').after;
 const newman = require('newman');
 
 //private variables
+let errors = [];
 let testStartTime;
 let threadCount;
 let averageResponseTimeMs = 0, responseSize = 0, requestsExecuted = 0, requestsFailed = 0, assertionsExecuted = 0, assertionsFailed = 0;
 
 function showResultsSummary() {
 	let totalRunDuration = (Date.now() - testStartTime) / 1000;
+	let averageResponseTimeSec = averageResponseTimeMs/1000;
+	// Determine if the delay has been extended because the previous request is not returning before the next request needs to be sent
+	let delayExtended = averageResponseTimeSec > options.delayRequest;
+	if(errors.length > 0) {
+		errors.forEach(error => console.log(error));
+		console.error(`\nErrors have occured in the collection requests or assertions that have invalidated the test.`);
+		console.error(`    This is usually caused by setting "maxThreads" to a number higher that this computer can manage.`);
+		if(delayExtended) {
+			console.error(`    Average Response Time already exceeds Delay so there are only 2 options:`);
+			console.error(`        1) Raise "--max-old-space-size" and re-run the test to see if extra memory corrects the errors`);
+			console.error(`        2) Reduce "usersToSimulate". May requiring adding additional test computers to reach the original number of users`);
+		} else {
+			console.error(`     Try lowering the "maxThreads" setting and trying the test again`);
+		}
+	} else if(delayExtended) {
+		console.error(`\nAverage Response Time already exceeds Delay so it is recommended to increase "maxThreads" if the server is not the bottleneck`);
+	}
 	console.log(`\nAll test now complete\n`);
 	console.log(`Simulated Users:             ${usersToSimulate}`);
 	console.log(`Avg Calls / User / Min:      ${averageCallsPerUserPerMinute}`);
 	console.log(`Threads:                     ${threadCount}`);
-	console.log(`Delay:                       ${options.delayRequest}`);
+	console.log(`Delay (ms):                  ${options.delayRequest}`);
 	console.log(`Iterations:                  ${options.iterationCount}`);
 	console.log(`Thread Ramp Up per Second    ${threadRampUpPerSec}`);
 	console.log(`Total Run Duration (sec):    ${totalRunDuration.toFixed(0)}`);
 	console.log(`Total Data Received (MB):    ${(responseSize/1048576).toFixed(0)}`);
 	console.log(`Average Requests per Second: ${(threadCount*1000/options.delayRequest).toFixed(1)}`);
-	console.log(`Average Response Time (sec): ${(averageResponseTimeMs/1000).toFixed(2)}`);
+	console.log(`Average Response Time (sec): ${averageResponseTimeSec.toFixed(2)}`);
 	console.log(`Requests:                    Executed = ${requestsExecuted}, Failed = ${requestsFailed}, Success Rate = ${((1-(requestsFailed/requestsExecuted))*100).toFixed(0)}%`);
 	console.log(`Assertions:                  Executed = ${assertionsExecuted}, Failed = ${assertionsFailed}, Success Rate = ${((1-(assertionsFailed/assertionsExecuted))*100).toFixed(0)}%`);
 }
@@ -75,12 +91,13 @@ function test() {
 }
 
 function testThread(next) {
-	// console.log(`Test thread - starting`);
+	// Each thread should slightly offset so the load on the API is more realistically distributed
+	options.delayRequest *= (Math.random() + 0.5);
 	newman.run(
 		options,
-		(err, summary) => {
-			if (err) {
-				console.log(err);
+		(error, summary) => {
+			if (error) {
+				errors.push(error);
 			} else {
 				averageResponseTimeMs += summary.run.timings.responseAverage / threadCount;
 				requestsExecuted += summary.run.stats.requests.total;

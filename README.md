@@ -2,6 +2,14 @@
 
 Enhancement for PostMan allowing for parallel execution of API calls to simulate load or stress conditions
 
+## Features
+* Thread ramp up
+* Average calls per minute (with randomization)
+* Summarize all threads into final report
+* Scalability to 4000+ concurrent users
+* Client or server bottleneck detection
+* Error handling
+
 ## Setup Steps
 1. Download this project or clone it using GIT
 	* git clone https://github.com/PaulGilchrist/postman-load-test.git
