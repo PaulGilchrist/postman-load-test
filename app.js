@@ -57,7 +57,7 @@ function showResultsSummary() {
 	console.log(`Simulated Users:             ${usersToSimulate}`);
 	console.log(`Avg Calls / User / Min:      ${averageCallsPerUserPerMinute}`);
 	console.log(`Threads:                     ${threadCount}`);
-	console.log(`Delay (ms):                  ${options.delayRequest}`);
+	console.log(`Delay (ms):                  ${options.delayRequest.toFixed(0)}`);
 	console.log(`Iterations:                  ${options.iterationCount}`);
 	console.log(`Thread Ramp Up per Second    ${threadRampUpPerSec}`);
 	console.log(`Total Run Duration (sec):    ${totalRunDuration.toFixed(0)}`);
@@ -92,7 +92,8 @@ function test() {
 
 function testThread(next) {
 	// Each thread should slightly offset so the load on the API is more realistically distributed
-	options.delayRequest = options.delayRequest * (Math.random() + 0.5);
+	let originalDelayRequest = options.delayRequest;
+	options.delayRequest = originalDelayRequest * (Math.random() + 0.5);
 	newman.run(
 		options,
 		(error, summary) => {
@@ -115,6 +116,8 @@ function testThread(next) {
 			next();
 		}
 	);
+	// Reset delay so each thread starts from the same value
+	options.delayRequest = originalDelayRequest;
 }
 
 test();
