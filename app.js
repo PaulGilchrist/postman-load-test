@@ -1,7 +1,7 @@
 // This application has been successfully tested to 4000 usersToSimulate and 400 maxThreads
 
 // Standard tuning
-const usersToSimulate = 1;
+const usersToSimulate = 100;
 const averageCallsPerUserPerMinute = 2; // Recommend 2 for load test or 60 for stress test
 
 // Advanced tuning
@@ -36,9 +36,8 @@ let averageResponseTimeMs = 0, responseSize = 0, requestsExecuted = 0, requestsF
 
 function showResultsSummary() {
 	let totalRunDuration = (Date.now() - testStartTime) / 1000;
-	let averageResponseTimeSec = averageResponseTimeMs/1000;
 	// Determine if the delay has been extended because the previous request is not returning before the next request needs to be sent
-	let delayExtended = averageResponseTimeSec > options.delayRequest;
+	let delayExtended = averageResponseTimeMs > options.delayRequest;
 	if(errors.length > 0) {
 		errors.forEach(error => console.log(error));
 		console.error(`\nErrors have occured in the collection requests or assertions that have invalidated the test.`);
@@ -63,7 +62,7 @@ function showResultsSummary() {
 	console.log(`Total Run Duration (sec):    ${totalRunDuration.toFixed(0)}`);
 	console.log(`Total Data Received (MB):    ${(responseSize/1048576).toFixed(0)}`);
 	console.log(`Average Requests per Second: ${(threadCount*1000/options.delayRequest).toFixed(1)}`);
-	console.log(`Average Response Time (sec): ${averageResponseTimeSec.toFixed(2)}`);
+	console.log(`Average Response Time (sec): ${(averageResponseTimeMs/1000).toFixed(2)}`);
 	console.log(`Requests:                    Executed = ${requestsExecuted}, Failed = ${requestsFailed}, Success Rate = ${((1-(requestsFailed/requestsExecuted))*100).toFixed(0)}%`);
 	console.log(`Assertions:                  Executed = ${assertionsExecuted}, Failed = ${assertionsFailed}, Success Rate = ${((1-(assertionsFailed/assertionsExecuted))*100).toFixed(0)}%`);
 }
