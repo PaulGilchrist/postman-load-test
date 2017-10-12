@@ -1,7 +1,7 @@
 // This application has been successfully tested to 4000 usersToSimulate and 400 maxThreads
 
 // Standard tuning
-const usersToSimulate = 4000;
+const usersToSimulate = 1;
 const averageCallsPerUserPerMinute = 2; // Recommend 2 for load test or 60 for stress test
 
 // Advanced tuning
@@ -92,7 +92,7 @@ function test() {
 
 function testThread(next) {
 	// Each thread should slightly offset so the load on the API is more realistically distributed
-	options.delayRequest *= (Math.random() + 0.5);
+	options.delayRequest = options.delayRequest * (Math.random() + 0.5);
 	newman.run(
 		options,
 		(error, summary) => {
