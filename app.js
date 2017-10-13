@@ -1,5 +1,4 @@
 // Requires
-const after = require('lodash').after;
 let Worker = require("tiny-worker");
 
 // Variables
