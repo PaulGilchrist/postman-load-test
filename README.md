@@ -4,7 +4,7 @@ Enhancement for PostMan allowing for parallel execution of API calls to simulate
 
 ## Features
 * Thread ramp up
-* Average calls per minute (with randomization)
+* Average calls per minute
 * Summarize all threads into final report
 * Scalability to 4000+ concurrent users
 * Client or server bottleneck detection

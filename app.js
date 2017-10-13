@@ -1,9 +1,13 @@
+// Tested successfuly to 4000 threads, ramp up of 4 per second, and delay of 30000
+//		Consumed 4 cores 100% and used 28GB of memory
+//		Would have used more CPU and memory if available
+
 // Requires
 let Worker = require("tiny-worker");
 
 // Variables
-const threads = 1000; // Testing showed 100 MB per thread so ramp up slowly and make sure this computer does not become the bottleneck
-const threadRampUpPerSec = 1; // Starting too many threads at once will crush this computer
+const threads = 10; // Testing showed 100 MB per thread so ramp up slowly and make sure this computer does not become the bottleneck
+const threadRampUpPerSec = 4; // Starting too many threads at once will crush this computer
 
 const options = {
 	collection: './postman_collection.json',
@@ -85,6 +89,7 @@ function workerOnMessage(ev) {
 	}
 	console.log(`Thread ${ev.data.index} completed`);
 	workers[ev.data.index].terminate();
+	workers[ev.data.index] = null;
 	runningWorkers--;
 	if(runningWorkers === 0) {
 		showResultsSummary();
