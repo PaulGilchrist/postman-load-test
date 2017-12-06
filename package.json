@@ -14,7 +14,7 @@
   "version": "1.0.0",
   "scripts": {},
   "dependencies": {
-    "newman": "^3.8.3",
+    "newman": "^3.9.0",
     "tiny-worker": "^2.1.1"
   },
   "devDependencies": {}

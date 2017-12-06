@@ -21,8 +21,9 @@ Enhancement for PostMan allowing for parallel execution of API calls to simulate
 1. Run Postman exporting the collection to test and it's dependent environment (if any)
 	* You may need to update any tokens in the environment before exporting
 2. Edit app.js global variables to match the exported file names and test options desired
-3. Launch the load test setting "max-old-space-size" to as much memory as you can afford to allocate.  This helps ensure Node has enough memory to manage all the threads you have choosen to run.  If the script errors with a heap allocation error, either reduce the number of threads, or increase the memory allocated by "max-old-space-size".  This application has been successfully tested beyond 4000 threads.
-	* node --max-old-space-size=8192 app.js
+3. Launch the load test
+	* node app.js
+	* Can optionally set "max-old-space-size" if single test run requires more than the default amount of memory allocated to node.  example: node --max-old-space-size=8192 app.js
 4. Record results
 	* Concurrent Threads
 	* Total Run Duration (sec)
