@@ -14,11 +14,15 @@ Enhancement for PostMan allowing for parallel execution of API calls to simulate
 1. Download this project or clone it using GIT
 	* git clone https://github.com/PaulGilchrist/postman-load-test.git
 1. Install nodejs (if not already installed)
+	* If node was previously installed, make sure it is the latest version, and also make sure npm is the latest version
+		* node -v
+		* npm install npm -g
 2. Change to the postmanLoadTest folder and install needed packages
 	* npm install
 
 ## Test Execution Steps
 1. Run Postman exporting the collection to test and it's dependent environment (if any)
+	* Test the collection in Postman before exporting
 	* You may need to update any tokens in the environment before exporting
 2. Edit app.js global variables to match the exported file names and test options desired
 3. Launch the load test
