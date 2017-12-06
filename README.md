@@ -17,7 +17,7 @@ Enhancement for PostMan allowing for parallel execution of API calls to simulate
 	* If node was previously installed, make sure it is the latest version, and also make sure npm is the latest version
 		* node -v
 		* npm install npm -g
-2. Change to the postmanLoadTest folder and install needed packages
+2. Change to the postman-load-test folder and install needed packages
 	* npm install
 
 ## Test Execution Steps
