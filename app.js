@@ -10,9 +10,9 @@ const threads = 10; // Testing showed 100 MB per thread so ramp up slowly and ma
 const threadRampUpPerSec = 4; // Starting too many threads at once will crush this computer
 
 const options = {
-	collection: './postman_collection2.json',
+	collection: './postman_collection.json',
 	delayRequest: 30000, // In milliseconds - Recommend 30000 for load test or 60 for stress test
-	environment: './postman_environment2.json',
+	environment: './postman_environment.json',
 	insecure: true,
 	iterationCount: 1,
     reporters: ['cli'],
