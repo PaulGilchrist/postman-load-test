@@ -7,7 +7,7 @@ let Worker = require("tiny-worker");
 
 // Variables
 const threads = 10; // Testing showed 100 MB per thread so ramp up slowly and make sure this computer does not become the bottleneck
-const threadRampUpPerSec = 4; // Starting too many threads at once will crush this computer
+const threadRampUpPerSec = 1; // Starting too many threads at once will crush this computer
 
 const options = {
 	collection: './postman_collection.json',
