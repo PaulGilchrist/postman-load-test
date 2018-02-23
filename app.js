@@ -31,7 +31,9 @@ let summary = {
 	requestsExecuted: 0,
 	requestsFailed: 0,
 	assertionsExecuted: 0,
-	assertionsFailed: 0
+	assertionsFailed: 0,
+	threadsCompleted: 0,
+	threadsFailed: 0
 }
 
 let testStartTime;
@@ -40,10 +42,9 @@ let workers = [];
 let runningWorkers = 0;
 
 function showResultsSummary() {
-	errors.forEach(error => console.log(error));
+	//errors.forEach(error => console.log(error));
 	let totalRunDuration = (Date.now() - testStartTime) / 1000;
 	console.log(`\nAll test now complete\n`);
-	console.log(`Threads:                     ${threads}`);
 	console.log(`Delay (ms):                  ${options.delayRequest.toFixed(0)}`);
 	console.log(`Iterations:                  ${options.iterationCount}`);
 	console.log(`Thread Ramp Up per Second    ${threadRampUpPerSec}`);
@@ -51,6 +52,7 @@ function showResultsSummary() {
 	console.log(`Total Data Received (MB):    ${(summary.responseSize/1048576).toFixed(0)}`);
 	console.log(`Average Requests per Second: ${(threads*1000/options.delayRequest).toFixed(1)}`);
 	console.log(`Average Response Time (sec): ${(summary.averageResponseTimeMs/1000).toFixed(2)}`);
+	console.log(`Threads:                     Executed = ${summary.threadsCompleted}, Failed = ${summary.threadsFailed}, Success Rate = ${((1-(summary.threadsFailed/summary.threadsCompleted))*100).toFixed(0)}%`);
 	console.log(`Requests:                    Executed = ${summary.requestsExecuted}, Failed = ${summary.requestsFailed}, Success Rate = ${((1-(summary.requestsFailed/summary.requestsExecuted))*100).toFixed(0)}%`);
 	console.log(`Assertions:                  Executed = ${summary.assertionsExecuted}, Failed = ${summary.assertionsFailed}, Success Rate = ${((1-(summary.assertionsFailed/summary.assertionsExecuted))*100).toFixed(0)}%`);
 }
@@ -78,14 +80,16 @@ function test() {
 
 function workerOnMessage(ev) {
 	if(ev.data.error) {
-		errors.push(ev.data.error);
+		//errors.push(ev.data.error);
+		summary.threadsFailed++;
 	} else if(ev.data.summary) {
 		summary.averageResponseTimeMs += ev.data.summary.averageResponseTimeMs / threads;
-		summary.responseSize += ev.data.summary.responseSize
-		summary.requestsExecuted += ev.data.summary.requestsExecuted
-		summary.requestsFailed += ev.data.summary.requestsFailed
-		summary.assertionsExecuted += ev.data.summary.assertionsExecuted
-		summary.assertionsFailed += ev.data.summary.assertionsFailed
+		summary.responseSize += ev.data.summary.responseSize;
+		summary.requestsExecuted += ev.data.summary.requestsExecuted;
+		summary.requestsFailed += ev.data.summary.requestsFailed;
+		summary.assertionsExecuted += ev.data.summary.assertionsExecuted;
+		summary.assertionsFailed += ev.data.summary.assertionsFailed;
+		summary.threadsCompleted++;
 	}
 	console.log(`Thread ${ev.data.index} completed`);
 	workers[ev.data.index].terminate();
